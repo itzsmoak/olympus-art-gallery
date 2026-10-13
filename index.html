@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Virtual Art Gallery - Olympus</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(0, 0, 0, 0.4);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 10, 12, 0.95);
+      color: #f5f4ef;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 30;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #overlay h1 {
+      margin: 0 0 10px 0;
+      letter-spacing: 3px;
+      font-weight: 300;
+      text-transform: uppercase;
+      font-size: 1.8rem;
+    }
+
+    #overlay p {
+      margin: 0 0 30px 0;
+      color: #a09a8e;
+      font-size: 0.95rem;
+    }
+
+    .btn-container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .device-btn {
+      background: transparent;
+      border: 2px solid #d4af37;
+      color: #f5f4ef;
+      padding: 14px 28px;
+      font-size: 1rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .device-btn:hover {
+      background: #d4af37;
+      color: #111;
+    }
+
+    /* Inspect Modal */
+    #inspect-modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 10, 14, 0.92);
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 40;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    #inspect-modal.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .inspect-card {
+      background: rgba(25, 25, 30, 0.9);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 8px;
+      width: min(90vw, 600px);
+      padding: 40px;
+      color: #f5f4ef;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
+    }
+
+    .inspect-card h2 {
+      margin: 0;
+      font-size: 1.6rem;
+      letter-spacing: 2px;
+      font-weight: 300;
+      color: #d4af37;
+    }
+
+    .inspect-card h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: #a09a8e;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .inspect-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .inspect-btn {
+      background: #d4af37;
+      border: none;
+      color: #111;
+      padding: 12px 24px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .inspect-btn:hover {
+      opacity: 0.85;
+    }
+
+    .inspect-btn.secondary {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #f5f4ef;
+    }
+
+    /* Floating Audio Player Widget */
+    #audio-player-ui {
+      position: absolute;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(20, 20, 24, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #f5f4ef;
+      padding: 12px 24px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    #audio-player-ui.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .audio-icon {
+      width: 12px;
+      height: 12px;
+      background: #d4af37;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #d4af37;
+    }
+
+    .audio-info h4 {
+      margin: 0;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #d4af37;
+    }
+
+    .audio-info p {
+      margin: 2px 0 0 0;
+      font-size: 0.9rem;
+      font-weight: 300;
+    }
+
+    #prompt-hint {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: #f5f4ef;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 20;
+      pointer-events: none;
+    }
+    #prompt-hint.visible { opacity: 1; }
+
+    #joystick-zone {
+      position: absolute;
+      bottom: 40px;
+      left: 40px;
+      width: 100px;
+      height: 100px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: none;
+      z-index: 20;
+    }
+
+    #joystick-knob {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      width: 40px;
+      height: 40px;
+      background: rgba(200, 190, 175, 0.6);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+  </style>
+  <script src="https://unpkg.com/three@0.136.0/build/three.min.js"></script>
+</head>
+<body>
+  <div id="crosshair"></div>
+  <div id="prompt-hint">Press [ I ] to Inspect Artwork</div>
+
+  <div id="audio-player-ui">
+    <div class="audio-icon"></div>
+    <div class="audio-info">
+      <h4 id="audio-artist">Artist Audio Guide</h4>
+      <p id="audio-title">Listening to exhibition track...</p>
+    </div>
+  </div>
+
+  <div id="inspect-modal">
+    <div class="inspect-card">
+      <h3 id="inspect-artist">Artist Name</h3>
+      <h2 id="inspect-title">Artwork Title</h2>
+      <p id="inspect-desc" style="color: #a09a8e; font-size: 0.95rem; line-height: 1.5; margin: 0;">Artist statement commentary.</p>
+      <div class="inspect-actions">
+        <button class="inspect-btn" id="modal-audio-btn">Play Audio Guide</button>
+        <button class="inspect-btn secondary" id="modal-close-btn">Resume Tour</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="overlay">
+    <h1>Virtual Art Gallery</h1>
+    <p>Please select your device to enter the exhibition</p>
+    <div class="btn-container">
+      <button class="device-btn" id="btn-desktop">Desktop</button>
+      <button class="device-btn" id="btn-mobile">Mobile / Tablet</button>
+    </div>
+  </div>
+
+  <div id="joystick-zone">
+    <div id="joystick-knob"></div>
+  </div>
+
+  <script>
+    var active = false;
+    var isMobileMode = false;
+    var isInspecting = false;
+    var currentLookAtTarget = null;
+
+    var overlay = document.getElementById('overlay');
+    var joystickZone = document.getElementById('joystick-zone');
+    var joystickKnob = document.getElementById('joystick-knob');
+    var audioUi = document.getElementById('audio-player-ui');
+    var promptHint = document.getElementById('prompt-hint');
+    var inspectModal = document.getElementById('inspect-modal');
+    
+    var audioArtistText = document.getElementById('audio-artist');
+    var audioTitleText = document.getElementById('audio-title');
+    var inspectArtist = document.getElementById('inspect-artist');
+    var inspectTitle = document.getElementById('inspect-title');
+    var inspectDesc = document.getElementById('inspect-desc');
+    var modalAudioBtn = document.getElementById('modal-audio-btn');
+    var modalCloseBtn = document.getElementById('modal-close-btn');
+
+    document.getElementById('btn-desktop').addEventListener('click', function() {
+      isMobileMode = false;
+      document.body.requestPointerLock();
+      startExperience();
+    });
+
+    document.getElementById('btn-mobile').addEventListener('click', function() {
+      isMobileMode = true;
+      joystickZone.style.display = 'block';
+      startExperience();
+    });
+
+    function startExperience() {
+      overlay.style.display = 'none';
+      active = true;
+    }
+
+    document.addEventListener('pointerlockchange', function() {
+      if (document.pointerLockElement !== document.body && !isMobileMode && active && !isInspecting) {
+        overlay.style.display = 'flex';
+        active = false;
+      }
+    });
+
+    var scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111114);
+
+    var camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.rotation.order = 'YXZ';
+    camera.position.set(-10, 1.6, 0);
+
+    var renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.9;
+    document.body.appendChild(renderer.domElement);
+
+    var hemiLight = new THREE.HemisphereLight(0xe8e4dc, 0x222226, 0.5);
+    scene.add(hemiLight);
+
+    function addGalleryCeilingLight(x, z) {
+      var light = new THREE.SpotLight(0xfff5e4, 0.5, 22, Math.PI / 2.5, 0.8, 1.2);
+      light.position.set(x, 10.8, z);
+      light.target.position.set(x, 0, z);
+      scene.add(light);
+      scene.add(light.target);
+    }
+    addGalleryCeilingLight(-7, 0);
+    addGalleryCeilingLight(0, 0);
+    addGalleryCeilingLight(7, 0);
+
+    var floorCanvas = document.createElement('canvas');
+    floorCanvas.width = 256; floorCanvas.height = 256;
+    var fctx = floorCanvas.getContext('2d');
+    fctx.fillStyle = '#eae8e2'; fctx.fillRect(0, 0, 256, 256);
+    fctx.fillStyle = '#161619';
+    fctx.fillRect(0, 0, 128, 128);
+    fctx.fillRect(128, 128, 128, 128);
+
+    var floorTexture = new THREE.CanvasTexture(floorCanvas);
+    floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
+    floorTexture.repeat.set(8, 4);
+
+    var floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(24, 16),
+      new THREE.MeshStandardMaterial({ map: floorTexture, roughness: 0.4, metalness: 0.05 })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    scene.add(floor);
+
+    function generateMarbleTexture() {
+      var canvas = document.createElement('canvas');
+      canvas.width = 1024; canvas.height = 1024;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ebe9e1';
+      ctx.fillRect(0, 0, 1024, 1024);
+
+      for (var i = 0; i < 28; i++) {
+        var grad = ctx.createRadialGradient(
+          Math.random() * 1024, Math.random() * 1024, 10,
+          Math.random() * 1024, Math.random() * 1024, 280
+        );
+        grad.addColorStop(0, 'rgba(200, 195, 185, 0.25)');
+        grad.addColorStop(1, 'rgba(235, 233, 225, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 1024, 1024);
+      }
+
+      function drawVein(startX, startY, length, strokeColor, lineWidth) {
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = lineWidth;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        var x = startX, y = startY;
+        for (var j = 0; j < length; j++) {
+          x += (Math.random() - 0.5) * 16 + 2;
+          y += (Math.random() - 0.45) * 14;
+          ctx.lineTo(x, y);
+          if (Math.random() < 0.04 && lineWidth > 1) {
+            drawVein(x, y, length / 2, strokeColor, lineWidth * 0.6);
+          }
+        }
+        ctx.stroke();
+      }
+
+      for (var i = 0; i < 18; i++) drawVein(Math.random() * 1024, Math.random() * 1024, 90, 'rgba(105, 110, 115, 0.35)', 3.2);
+      for (var i = 0; i < 10; i++) drawVein(Math.random() * 1024, Math.random() * 1024, 60, 'rgba(150, 140, 125, 0.22)', 1.8);
+
+      var texture = new THREE.CanvasTexture(canvas);
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      return texture;
+    }
+
+    var wallHeight = 11.25;
+    var marbleTex = generateMarbleTexture();
+    var longWallTex = marbleTex.clone(); longWallTex.repeat.set(6, 3);
+    var shortWallTex = marbleTex.clone(); shortWallTex.repeat.set(4, 3);
+
+    var marbleMatLong = new THREE.MeshStandardMaterial({ map: longWallTex, roughness: 0.35, metalness: 0.02 });
+    var marbleMatShort = new THREE.MeshStandardMaterial({ map: shortWallTex, roughness: 0.35, metalness: 0.02 });
+
+    var northMesh = new THREE.Mesh(new THREE.PlaneGeometry(24, wallHeight), marbleMatLong);
+    northMesh.position.set(0, wallHeight/2, -8);
+    scene.add(northMesh);
+
+    var southMesh = new THREE.Mesh(new THREE.PlaneGeometry(24, wallHeight), marbleMatLong);
+    southMesh.position.set(0, wallHeight/2, 8);
+    southMesh.rotation.y = Math.PI;
+    scene.add(southMesh);
+    
+    var eastWall = new THREE.Mesh(new THREE.PlaneGeometry(16, wallHeight), marbleMatShort);
+    eastWall.position.set(12, wallHeight / 2, 0);
+    eastWall.rotation.y = -Math.PI / 2;
+    scene.add(eastWall);
+
+    var westWall = new THREE.Mesh(new THREE.PlaneGeometry(16, wallHeight), marbleMatShort);
+    westWall.position.set(-12, wallHeight / 2, 0);
+    westWall.rotation.y = Math.PI / 2;
+    scene.add(westWall);
+
+    var ceiling = new THREE.Mesh(new THREE.PlaneGeometry(24, 16), new THREE.MeshStandardMaterial({ color: 0xd9d6ce, roughness: 0.85 }));
+    ceiling.position.set(0, wallHeight, 0);
+    ceiling.rotation.x = Math.PI / 2;
+    scene.add(ceiling);
+
+    function buildColumns() {
+      var colMat = new THREE.MeshStandardMaterial({ map: marbleTex, roughness: 0.3, metalness: 0.05 });
+      var colGeom = new THREE.CylinderGeometry(0.5, 0.6, wallHeight, 16);
+      
+      var xPositions = [-6, 0, 6];
+      var zPositions = [-3.5, 3.5];
+
+      for (var i = 0; i < xPositions.length; i++) {
+        for (var j = 0; j < zPositions.length; j++) {
+          var column = new THREE.Mesh(colGeom, colMat);
+          column.position.set(xPositions[i], wallHeight / 2, zPositions[j]);
+          scene.add(column);
+        }
+      }
+    }
+    buildColumns();
+
+    function buildEntranceDoor() {
+      var doorGroup = new THREE.Group();
+      var woodCanvas = document.createElement('canvas');
+      woodCanvas.width = 512; woodCanvas.height = 1024;
+      var wctx = woodCanvas.getContext('2d');
+      wctx.fillStyle = '#3a2416'; wctx.fillRect(0, 0, 512, 1024);
+      for (var i = 0; i < 400; i++) {
+        wctx.fillStyle = Math.random() > 0.5 ? 'rgba(42, 25, 14, 0.4)' : 'rgba(75, 48, 30, 0.3)';
+        wctx.fillRect(Math.random() * 512, 0, Math.random() * 4 + 1, 1024);
+      }
+      var woodTexture = new THREE.CanvasTexture(woodCanvas);
+      var woodMat = new THREE.MeshStandardMaterial({ map: woodTexture, roughness: 0.65 });
+      var frameMat = new THREE.MeshStandardMaterial({ color: 0x1f140c, roughness: 0.7 });
+      var handleMat = new THREE.MeshStandardMaterial({ color: 0x8b6528, roughness: 0.35, metalness: 0.8 });
+
+      doorGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.12, 4.85, 2.65), frameMat));
+      var leftDoor = new THREE.Mesh(new THREE.BoxGeometry(0.08, 4.75, 1.25), woodMat); leftDoor.position.set(0.02, 0, -0.63);
+      var rightDoor = new THREE.Mesh(new THREE.BoxGeometry(0.08, 4.75, 1.25), woodMat); rightDoor.position.set(0.02, 0, 0.63);
+      doorGroup.add(leftDoor, rightDoor);
+
+      var hGeom = new THREE.CylinderGeometry(0.02, 0.02, 0.45);
+      var leftHandle = new THREE.Mesh(hGeom, handleMat); leftHandle.position.set(0.09, -0.1, -0.12);
+      var rightHandle = new THREE.Mesh(hGeom, handleMat); rightHandle.position.set(0.09, -0.1, 0.12);
+      doorGroup.add(leftHandle, rightHandle);
+
+      doorGroup.position.set(-11.92, 2.42, 0);
+      scene.add(doorGroup);
+    }
+    buildEntranceDoor();
+
+    var raycaster = new THREE.Raycaster();
+    var interactables = [];
+    var currentAudio = null;
+    var currentTargetId = null;
+    var textureLoader = new THREE.TextureLoader();
+
+    function createArtwork(id, x, y, z, rotY, w, h, artistName, pieceTitle, description, imageSrc, audioSrc) {
+      var group = new THREE.Group();
+      var frame = new THREE.Mesh(new THREE.BoxGeometry(w + 0.2, h + 0.2, 0.08), new THREE.MeshStandardMaterial({ color: 0x1b1916, roughness: 0.4 }));
+      group.add(frame);
+
+      var canvasMat = new THREE.MeshStandardMaterial({ color: 0x2b2d30, roughness: 0.8 });
+      if (imageSrc) {
+        textureLoader.load(imageSrc, function(tex) {
+          canvasMat.map = tex;
+          canvasMat.color.set(0xffffff);
+          canvasMat.needsUpdate = true;
+        });
+      }
+
+      var canvasMesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), canvasMat);
+      canvasMesh.position.z = 0.045;
+      group.add(canvasMesh);
+
+      group.position.set(x, y, z);
+      group.rotation.y = rotY;
+
+      canvasMesh.userData = {
+        id: id,
+        artist: artistName,
+        title: pieceTitle,
+        desc: description,
+        audio: new Audio(audioSrc)
+      };
+      scene.add(group);
+      interactables.push(canvasMesh);
+    }
+
+    // --- FEATURE PIECE: SELF-HATRED ---
+    createArtwork('self_hatred', 0.0, 2.8, -7.95, 0, 3.6, 2.8, 'Orekyeh Akachukwu Philip', 'SELF-HATRED', 'An intense psychological exploration of internal conflict, contrasting thermal gold and crimson tones with two figures locked in emotional confrontation.', './SELF-HATRED.jpg', './assets/audio/artist1_piece1.mp3');
+
+    // --- FEATURE WALL & SIDE PIECES ---
+    createArtwork('feature_center', 11.95, 2.8, 0.0, -Math.PI / 2, 2.8, 4.2, 'Orekyeh Akachukwu Philip', 'The Olympian Monolith', 'A monumental study capturing structural purity and timeless balance through neoclassical form.', null, './assets/audio/artist3_piece1.mp3');
+    createArtwork('feature_tl', 11.95, 5.2, -2.8, -Math.PI / 2, 1.6, 1.4, 'Orekyeh Akachukwu Philip', 'Study in Marble I', 'Exploring tactile surfaces and subtle tonal shifts in polished stone.', null, './assets/audio/artist3_piece2.mp3');
+    createArtwork('feature_bl', 11.95, 0.8, -3.2, -Math.PI / 2, 1.5, 1.5, 'Orekyeh Akachukwu Philip', 'Echoes of Athens', 'Reflecting ancient architectural traditions in modern digital composition.', null, './assets/audio/artist3_piece1.mp3');
+    createArtwork('feature_tr', 11.95, 4.8, 2.9, -Math.PI / 2, 1.4, 1.8, 'Orekyeh Akachukwu Philip', 'Golden Proportion', 'Mathematical harmony manifested through visual balance and proportion.', null, './assets/audio/artist3_piece2.mp3');
+    createArtwork('feature_mr', 11.95, 2.6, 3.2, -Math.PI / 2, 1.5, 1.3, 'Orekyeh Akachukwu Philip', 'Vespers', 'Capturing evening serenity across classical facades.', null, './assets/audio/artist3_piece1.mp3');
+    createArtwork('feature_br', 11.95, 0.9, 2.5, -Math.PI / 2, 1.4, 1.4, 'Orekyeh Akachukwu Philip', 'Terra Cotta', 'Warm earth tones and tactile pigment studies.', null, './assets/audio/artist3_piece2.mp3');
+
+    createArtwork('north_1', -8.0, 2.5, -7.95, 0, 2.2, 1.8, 'Orekyeh Akachukwu Philip', 'True East', 'A vibrant exploration of cultural heritage and identity motifs.', null, './assets/audio/artist1_piece1.mp3');
+    createArtwork('north_2', 8.5, 2.8, -7.95, 0, 2.0, 2.0, 'Orekyeh Akachukwu Philip', 'Pantheon Study', 'Architectural perspective highlighting monumental scale.', null, './assets/audio/artist1_piece1.mp3');
+
+    createArtwork('south_1', -7.0, 2.2, 7.95, Math.PI, 2.4, 1.8, 'Orekyeh Akachukwu Philip', 'Colored Faces', 'Expressive portraiture highlighting human emotion and texture.', null, './assets/audio/artist2_piece1.mp3');
+    createArtwork('south_2', -1.0, 3.0, 7.95, Math.PI, 2.0, 2.2, 'Orekyeh Akachukwu Philip', 'Cersei Silhouette', 'Dramatic lighting framing a draped silhouette study.', null, './assets/audio/artist2_piece2.mp3');
+    createArtwork('south_3', 6.5, 2.5, 7.95, Math.PI, 2.6, 1.7, 'Orekyeh Akachukwu Philip', 'Gilded Symmetry', 'Ornamental balance and metallic light reflections.', null, './assets/audio/artist2_piece3.mp3');
+
+    var eulerY = -Math.PI / 2;
+    var eulerX = 0;
+    var moveInput = { forward: 0, right: 0 };
+    var keys = {};
+
+    window.addEventListener('keydown', function(e) {
+      if (e.code === 'KeyI' && currentLookAtTarget && active) {
+        toggleInspectMode();
+      }
+      keys[e.code] = true;
+    });
+    window.addEventListener('keyup', function(e) { keys[e.code] = false; });
+
+    window.addEventListener('mousemove', function(e) {
+      if (!active || isMobileMode || isInspecting) return;
+      if (document.pointerLockElement === document.body) {
+        eulerY -= e.movementX * 0.002;
+        eulerX -= e.movementY * 0.002;
+        eulerX = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, eulerX));
+      }
+    });
+
+    function toggleInspectMode() {
+      isInspecting = !isInspecting;
+      if (isInspecting) {
+        document.exitPointerLock();
+        inspectArtist.textContent = currentLookAtTarget.artist;
+        inspectTitle.textContent = currentLookAtTarget.title;
+        inspectDesc.textContent = currentLookAtTarget.desc;
+        inspectModal.classList.add('visible');
+      } else {
+        inspectModal.classList.remove('visible');
+        if (!isMobileMode) document.body.requestPointerLock();
+      }
+    }
+
+    modalCloseBtn.addEventListener('click', function() {
+      if (isInspecting) toggleInspectMode();
+    });
+
+    modalAudioBtn.addEventListener('click', function() {
+      if (currentLookAtTarget && currentLookAtTarget.audio) {
+        if (currentLookAtTarget.audio.paused) {
+          currentLookAtTarget.audio.play().catch(function(){});
+          modalAudioBtn.textContent = 'Pause Audio Guide';
+        } else {
+          currentLookAtTarget.audio.pause();
+          modalAudioBtn.textContent = 'Play Audio Guide';
+        }
+      }
+    });
+
+    var touchMoveId = null, touchLookId = null;
+    var lookStartX = 0, lookStartY = 0;
+
+    window.addEventListener('touchstart', function(e) {
+      if (!active || !isMobileMode || isInspecting) return;
+      for (var i = 0; i < e.changedTouches.length; i++) {
+        var t = e.changedTouches[i];
+        if (t.clientX < window.innerWidth / 2 && touchMoveId === null) {
+          touchMoveId = t.identifier;
+          handleJoystick(t);
+        } else if (t.clientX >= window.innerWidth / 2 && touchLookId === null) {
+          touchLookId = t.identifier;
+          lookStartX = t.clientX; lookStartY = t.clientY;
+        }
+      }
+    });
+
+    window.addEventListener('touchmove', function(e) {
+      if (!active || !isMobileMode || isInspecting) return;
+      for (var i = 0; i < e.changedTouches.length; i++) {
+        var t = e.changedTouches[i];
+        if (t.identifier === touchMoveId) {
+          handleJoystick(t);
+        } else if (t.identifier === touchLookId) {
+          var dx = t.clientX - lookStartX;
+          var dy = t.clientY - lookStartY;
+          eulerY -= dx * 0.004;
+          eulerX -= dy * 0.004;
+          eulerX = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, eulerX));
+          lookStartX = t.clientX; lookStartY = t.clientY;
+        }
+      }
+    });
+
+    var resetTouch = function(t) {
+      if (t.identifier === touchMoveId) {
+        touchMoveId = null; moveInput.forward = 0; moveInput.right = 0;
+        joystickKnob.style.transform = 'translate(0px, 0px)';
+      } else if (t.identifier === touchLookId) {
+        touchLookId = null;
+      }
+    };
+    window.addEventListener('touchend', function(e) { for (var i = 0; i < e.changedTouches.length; i++) resetTouch(e.changedTouches[i]); });
+    window.addEventListener('touchcancel', function(e) { for (var i = 0; i < e.changedTouches.length; i++) resetTouch(e.changedTouches[i]); });
+
+    function handleJoystick(touch) {
+      var rect = joystickZone.getBoundingClientRect();
+      var cx = rect.left + rect.width / 2;
+      var cy = rect.top + rect.height / 2;
+      var dx = touch.clientX - cx, dy = touch.clientY - cy;
+      var dist = Math.hypot(dx, dy), maxRadius = 38;
+      if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; }
+      joystickKnob.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+      moveInput.right = dx / maxRadius;
+      moveInput.forward = -dy / maxRadius;
+    }
+
+    var clock = new THREE.Clock();
+    var forwardVec = new THREE.Vector3();
+    var rightVec = new THREE.Vector3();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      var delta = Math.min(clock.getDelta(), 0.1);
+
+      if (active && !isInspecting) {
+        camera.rotation.y = eulerY;
+        camera.rotation.x = eulerX;
+
+        var f = moveInput.forward;
+        var r = moveInput.right;
+        if (!isMobileMode) {
+          f = (keys['KeyW'] || keys['ArrowUp'] ? 1 : 0) - (keys['KeyS'] || keys['ArrowDown'] ? 1 : 0);
+          r = (keys['KeyD'] || keys['ArrowRight'] ? 1 : 0) - (keys['KeyA'] || keys['ArrowLeft'] ? 1 : 0);
+        }
+
+        camera.getWorldDirection(forwardVec);
+        forwardVec.y = 0; forwardVec.normalize();
+        rightVec.crossVectors(camera.up, forwardVec).negate();
+
+        var speed = 3.8 * delta;
+        camera.position.addScaledVector(forwardVec, f * speed);
+        camera.position.addScaledVector(rightVec, r * speed);
+
+        camera.position.x = Math.max(-11.3, Math.min(11.3, camera.position.x));
+        camera.position.z = Math.max(-7.3, Math.min(7.3, camera.position.z));
+
+        raycaster.setFromCamera({ x: 0, y: 0 }, camera);
+        var hits = raycaster.intersectObjects(interactables);
+
+        if (hits.length > 0 && hits[0].distance < 7.0) {
+          var hit = hits[0].object;
+          currentLookAtTarget = hit.userData;
+          promptHint.classList.add('visible');
+
+          if (currentTargetId !== hit.userData.id) {
+            if (currentAudio) currentAudio.pause();
+            currentTargetId = hit.userData.id;
+            currentAudio = hit.userData.audio;
+            currentAudio.play().catch(function() {});
+
+            audioArtistText.textContent = hit.userData.artist;
+            audioTitleText.textContent = hit.userData.title;
+            audioUi.classList.add('visible');
+          }
+        } else {
+          currentLookAtTarget = null;
+          promptHint.classList.remove('visible');
+          if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+            currentTargetId = null;
+            audioUi.classList.remove('visible');
+          }
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', function() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
