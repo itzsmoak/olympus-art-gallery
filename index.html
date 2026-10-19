@@ -29,6 +29,51 @@
       z-index: 10;
     }
 
+    /* Top Left Desktop Navigation Overlay */
+    #nav-instructions {
+      position: absolute;
+      top: 25px;
+      left: 25px;
+      background: rgba(18, 18, 22, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 14px 18px;
+      color: #f5f4ef;
+      z-index: 20;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      pointer-events: none;
+    }
+
+    #nav-instructions.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    #nav-instructions h4 {
+      margin: 0 0 8px 0;
+      font-size: 0.85rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #f5f4ef;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      padding-bottom: 4px;
+    }
+
+    #nav-instructions ul {
+      margin: 0;
+      padding-left: 16px;
+      color: #aaa;
+    }
+
+    #nav-instructions li span {
+      color: #fff;
+      font-weight: 600;
+    }
+
     #overlay {
       position: absolute;
       inset: 0;
@@ -64,7 +109,7 @@
 
     .device-btn {
       background: transparent;
-      border: 2px solid #d4af37;
+      border: 2px solid #555;
       color: #f5f4ef;
       padding: 14px 28px;
       font-size: 1rem;
@@ -72,20 +117,22 @@
       text-transform: uppercase;
       border-radius: 4px;
       cursor: pointer;
+      transition: all 0.2s;
     }
 
     .device-btn:hover {
-      background: #d4af37;
+      background: #f5f4ef;
       color: #111;
+      border-color: #f5f4ef;
     }
 
-    /* Inspect Modal */
+    /* Minimalist Clean Inspect Modal */
     #inspect-modal {
       position: absolute;
       inset: 0;
-      background: rgba(10, 10, 14, 0.92);
-      backdrop-filter: blur(12px);
+      background: rgba(12, 12, 15, 0.95);
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       z-index: 40;
@@ -99,69 +146,131 @@
       visibility: visible;
     }
 
-    .inspect-card {
-      background: rgba(25, 25, 30, 0.9);
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      border-radius: 8px;
-      width: min(90vw, 600px);
-      padding: 40px;
-      color: #f5f4ef;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    .inspect-container {
+      width: min(85vw, 750px);
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      text-align: center;
-    }
-
-    .inspect-card h2 {
-      margin: 0;
-      font-size: 1.6rem;
-      letter-spacing: 2px;
-      font-weight: 300;
-      color: #d4af37;
-    }
-
-    .inspect-card h3 {
-      margin: 0;
-      font-size: 1rem;
-      color: #a09a8e;
-      font-weight: 400;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .inspect-actions {
-      display: flex;
       gap: 15px;
-      justify-content: center;
-      margin-top: 10px;
-    }
-
-    .inspect-btn {
-      background: #d4af37;
-      border: none;
-      color: #111;
-      padding: 12px 24px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-
-    .inspect-btn:hover {
-      opacity: 0.85;
-    }
-
-    .inspect-btn.secondary {
-      background: transparent;
-      border: 1px solid rgba(255,255,255,0.3);
       color: #f5f4ef;
     }
 
-    /* Floating Audio Player Widget */
+    .inspect-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      padding-bottom: 10px;
+    }
+
+    .artist-switcher {
+      display: flex;
+      gap: 15px;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+    }
+
+    .artist-tab {
+      background: none;
+      border: none;
+      color: #777;
+      cursor: pointer;
+      padding: 0;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+
+    .artist-tab.active {
+      color: #f5f4ef;
+      text-decoration: underline;
+      text-underline-offset: 6px;
+    }
+
+    .inspect-title {
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #aaa;
+      margin: 0;
+    }
+
+    .inspect-frame {
+      width: 100%;
+      height: 420px;
+      background: #1a1a1f;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .inspect-frame img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .audio-player-bar {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: rgba(25, 25, 30, 0.8);
+      padding: 14px 20px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .play-pause-btn {
+      background: none;
+      border: none;
+      color: #f5f4ef;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .audio-track-line {
+      flex-grow: 1;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .audio-track-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 100%;
+      background: #f5f4ef;
+    }
+
+    .audio-time {
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      color: #aaa;
+      min-width: 45px;
+      text-align: right;
+    }
+
+    .close-inspect {
+      position: absolute;
+      top: 30px;
+      right: 40px;
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 1rem;
+      cursor: pointer;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .close-inspect:hover { color: #fff; }
+
     #audio-player-ui {
       position: absolute;
       top: 30px;
@@ -191,11 +300,10 @@
     }
 
     .audio-icon {
-      width: 12px;
-      height: 12px;
-      background: #d4af37;
+      width: 10px;
+      height: 10px;
+      background: #f5f4ef;
       border-radius: 50%;
-      box-shadow: 0 0 10px #d4af37;
     }
 
     .audio-info h4 {
@@ -203,13 +311,14 @@
       font-size: 0.85rem;
       letter-spacing: 1px;
       text-transform: uppercase;
-      color: #d4af37;
+      color: #fff;
     }
 
     .audio-info p {
       margin: 2px 0 0 0;
       font-size: 0.9rem;
       font-weight: 300;
+      color: #aaa;
     }
 
     #prompt-hint {
@@ -218,7 +327,7 @@
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0,0,0,0.8);
-      border: 1px solid rgba(212, 175, 55, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       color: #f5f4ef;
       padding: 10px 20px;
       border-radius: 25px;
@@ -263,9 +372,21 @@
 </head>
 <body>
   <div id="crosshair"></div>
+
+  <!-- Top-Left Navigation Instructions HUD -->
+  <div id="nav-instructions">
+    <h4>Controls</h4>
+    <ul>
+      <li><span>W, A, S, D</span> / <span>Arrows</span> : Move</li>
+      <li><span>Mouse</span> : Look around</li>
+      <li><span>I</span> : Inspect Artwork</li>
+      <li><span>ESC</span> : Release Mouse / Exit</li>
+    </ul>
+  </div>
+
   <div id="prompt-hint">
     <span id="hint-text">Press [ I ] to Inspect Artwork</span>
-    <button id="inspect-action-btn" style="background:#d4af37; border:none; color:#111; padding:6px 12px; border-radius:4px; font-weight:600; cursor:pointer; display:none;">Inspect</button>
+    <button id="inspect-action-btn" style="background:#f5f4ef; border:none; color:#111; padding:6px 12px; border-radius:4px; font-weight:600; cursor:pointer; display:none;">Inspect</button>
   </div>
 
   <div id="audio-player-ui">
@@ -276,14 +397,29 @@
     </div>
   </div>
 
+  <!-- Inspect Modal -->
   <div id="inspect-modal">
-    <div class="inspect-card">
-      <h3 id="inspect-artist">Exhibition Artist</h3>
-      <h2 id="inspect-title">Artwork Title</h2>
-      <p id="inspect-desc" style="color: #a09a8e; font-size: 0.95rem; line-height: 1.5; margin: 0;">Exhibition piece commentary and artist perspective.</p>
-      <div class="inspect-actions">
-        <button class="inspect-btn" id="modal-audio-btn">Play Audio Guide</button>
-        <button class="inspect-btn secondary" id="modal-close-btn">Resume Tour</button>
+    <button class="close-inspect" id="modal-close-btn">✕ Close</button>
+    <div class="inspect-container">
+      <div class="inspect-header">
+        <div class="artist-switcher">
+          <button class="artist-tab active" data-artist="Nonso">Nonso</button>
+          <button class="artist-tab" data-artist="Sonder">Sonder</button>
+          <button class="artist-tab" data-artist="Aka">Aka</button>
+        </div>
+        <p class="inspect-title" id="inspect-title">PAINTING 1</p>
+      </div>
+
+      <div class="inspect-frame">
+        <img id="inspect-img" src="" alt="Artwork View">
+      </div>
+
+      <div class="audio-player-bar">
+        <button class="play-pause-btn" id="modal-audio-btn">▶</button>
+        <div class="audio-track-line" id="track-line">
+          <div class="audio-track-progress" id="track-progress"></div>
+        </div>
+        <div class="audio-time" id="audio-time">0:30</div>
       </div>
     </div>
   </div>
@@ -291,7 +427,7 @@
   <div id="overlay">
     <h1>Virtual Art Gallery</h1>
     <p>Please select your device to enter the exhibition</p>
-    <div class="device-btn-container" style="display: flex; gap: 20px;">
+    <div class="btn-container">
       <button class="device-btn" id="btn-desktop">Desktop</button>
       <button class="device-btn" id="btn-mobile">Mobile / Tablet</button>
     </div>
@@ -308,6 +444,7 @@
     var currentLookAtTarget = null;
 
     var overlay = document.getElementById('overlay');
+    var navInstructions = document.getElementById('nav-instructions');
     var joystickZone = document.getElementById('joystick-zone');
     var joystickKnob = document.getElementById('joystick-knob');
     var audioUi = document.getElementById('audio-player-ui');
@@ -318,16 +455,33 @@
     
     var audioArtistText = document.getElementById('audio-artist');
     var audioTitleText = document.getElementById('audio-title');
-    var inspectArtist = document.getElementById('inspect-artist');
     var inspectTitle = document.getElementById('inspect-title');
-    var inspectDesc = document.getElementById('inspect-desc');
+    var inspectImg = document.getElementById('inspect-img');
     var modalAudioBtn = document.getElementById('modal-audio-btn');
     var modalCloseBtn = document.getElementById('modal-close-btn');
+    var trackProgress = document.getElementById('track-progress');
+    var audioTimeDisplay = document.getElementById('audio-time');
+    var artistTabs = document.querySelectorAll('.artist-tab');
+
+    // Artist Switcher Logic
+    var activeArtist = 'Nonso';
+    artistTabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        artistTabs.forEach(function(t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        activeArtist = tab.getAttribute('data-artist');
+        if (currentLookAtTarget) {
+          currentLookAtTarget.artist = activeArtist;
+          audioArtistText.textContent = activeArtist;
+        }
+      });
+    });
 
     document.getElementById('btn-desktop').addEventListener('click', function() {
       isMobileMode = false;
       inspectActionBtn.style.display = 'none';
       hintText.textContent = 'Press [ I ] to Inspect Artwork';
+      navInstructions.style.display = 'block';
       document.body.requestPointerLock();
       startExperience();
     });
@@ -336,6 +490,7 @@
       isMobileMode = true;
       inspectActionBtn.style.display = 'inline-block';
       hintText.textContent = 'Artwork in view';
+      navInstructions.style.display = 'none';
       joystickZone.style.display = 'block';
       startExperience();
     });
@@ -366,19 +521,29 @@
     renderer.toneMappingExposure = 0.9;
     document.body.appendChild(renderer.domElement);
 
-    var hemiLight = new THREE.HemisphereLight(0xe8e4dc, 0x222226, 0.5);
+    var hemiLight = new THREE.HemisphereLight(0xe8e4dc, 0x222226, 0.4);
     scene.add(hemiLight);
 
-    function addGalleryCeilingLight(x, z) {
-      var light = new THREE.SpotLight(0xfff5e4, 0.5, 22, Math.PI / 2.5, 0.8, 1.2);
-      light.position.set(x, 10.8, z);
-      light.target.position.set(x, 0, z);
+    // Dedicated soft overhead spotlight mounted directly above each painting and door
+    function addIndividualPaintingSpotlight(x, y, z, rotY) {
+      var offset = 1.2;
+      var lightX = x;
+      var lightZ = z;
+
+      if (Math.abs(rotY - 0) < 0.1) { lightZ += offset; }
+      else if (Math.abs(rotY - Math.PI) < 0.1) { lightZ -= offset; }
+      else if (Math.abs(rotY - (-Math.PI / 2)) < 0.1) { lightX -= offset; }
+      else if (Math.abs(rotY - (Math.PI / 2)) < 0.1) { lightX += offset; }
+
+      var light = new THREE.SpotLight(0xfff6eb, 0.85, 9, Math.PI / 2.6, 0.45, 0.9);
+      light.position.set(lightX, y + 1.8, lightZ);
+
+      var targetObj = new THREE.Object3D();
+      targetObj.position.set(x, y, z);
+      scene.add(targetObj);
+      light.target = targetObj;
       scene.add(light);
-      scene.add(light.target);
     }
-    addGalleryCeilingLight(-7, 0);
-    addGalleryCeilingLight(0, 0);
-    addGalleryCeilingLight(7, 0);
 
     var floorCanvas = document.createElement('canvas');
     floorCanvas.width = 256; floorCanvas.height = 256;
@@ -519,6 +684,9 @@
 
       doorGroup.position.set(-11.92, 2.42, 0);
       scene.add(doorGroup);
+
+      // Overhead spotlight over the entrance door
+      addIndividualPaintingSpotlight(-11.92, 2.42, 0, Math.PI / 2);
     }
     buildEntranceDoor();
 
@@ -530,9 +698,7 @@
 
     function createArtwork(id, x, y, z, rotY, w, h, pieceTitle, description, imageSrc, audioSrc) {
       var group = new THREE.Group();
-      var frame = new THREE.Mesh(new THREE.BoxGeometry(w + 0.2, h + 0.2, 0.08), new THREE.MeshStandardMaterial({ color: 0x1b1916, roughness: 0.4 }));
-      group.add(frame);
-
+      
       var canvasMat = new THREE.MeshStandardMaterial({ color: 0x2b2d30, roughness: 0.8 });
       if (imageSrc) {
         textureLoader.load(imageSrc, function(tex) {
@@ -543,7 +709,6 @@
       }
 
       var canvasMesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), canvasMat);
-      canvasMesh.position.z = 0.045;
       group.add(canvasMesh);
 
       group.position.set(x, y, z);
@@ -551,31 +716,37 @@
 
       canvasMesh.userData = {
         id: id,
-        artist: 'Exhibition Artist',
+        artist: activeArtist,
         title: pieceTitle,
         desc: description,
+        imgSrc: imageSrc || '',
         audio: new Audio(audioSrc)
       };
       scene.add(group);
       interactables.push(canvasMesh);
+
+      // Mount spotlight above painting
+      addIndividualPaintingSpotlight(x, y, z, rotY);
     }
 
-    // --- ARTWORKS WITH GENERIC TITLES ---
-    createArtwork('painting_1', 0.0, 2.8, -7.95, 0, 3.6, 2.8, 'Painting 1', 'An intense psychological exploration of internal conflict, contrasting thermal gold and crimson tones with two figures locked in emotional confrontation.', './SELF-HATRED.jpg', './assets/audio/artist1_piece1.mp3');
+    // --- ARTWORKS CREATION ---
+    // North Wall
+    createArtwork('painting_1', 0.0, 2.8, -7.95, 0, 3.6, 2.8, 'PAINTING 1', 'An intense psychological exploration of internal conflict.', './SELF-HATRED.jpg', './assets/audio/artist1_piece1.mp3');
+    createArtwork('painting_8', -8.0, 2.5, -7.95, 0, 2.2, 1.8, 'PAINTING 8', 'A vibrant exploration of cultural heritage.', null, './assets/audio/artist1_piece1.mp3');
+    createArtwork('painting_9', 8.5, 2.8, -7.95, 0, 2.0, 2.0, 'PAINTING 9', 'Architectural perspective highlighting monumental scale.', null, './assets/audio/artist1_piece1.mp3');
 
-    createArtwork('painting_2', 11.95, 2.8, 0.0, -Math.PI / 2, 2.8, 4.2, 'Painting 2', 'A monumental study capturing structural purity and timeless balance through neoclassical form.', null, './assets/audio/artist3_piece1.mp3');
-    createArtwork('painting_3', 11.95, 5.2, -2.8, -Math.PI / 2, 1.6, 1.4, 'Painting 3', 'Exploring tactile surfaces and subtle tonal shifts in polished stone.', null, './assets/audio/artist3_piece2.mp3');
-    createArtwork('painting_4', 11.95, 0.8, -3.2, -Math.PI / 2, 1.5, 1.5, 'Painting 4', 'Reflecting ancient architectural traditions in modern digital composition.', null, './assets/audio/artist3_piece1.mp3');
-    createArtwork('painting_5', 11.95, 4.8, 2.9, -Math.PI / 2, 1.4, 1.8, 'Painting 5', 'Mathematical harmony manifested through visual balance and proportion.', null, './assets/audio/artist3_piece2.mp3');
-    createArtwork('painting_6', 11.95, 2.6, 3.2, -Math.PI / 2, 1.5, 1.3, 'Painting 6', 'Capturing evening serenity across classical facades.', null, './assets/audio/artist3_piece1.mp3');
-    createArtwork('painting_7', 11.95, 0.9, 2.5, -Math.PI / 2, 1.4, 1.4, 'Painting 7', 'Warm earth tones and tactile pigment studies.', null, './assets/audio/artist3_piece2.mp3');
+    // East Feature Wall
+    createArtwork('painting_2', 11.95, 2.8, 0.0, -Math.PI / 2, 2.8, 4.2, 'PAINTING 2', 'A monumental study capturing structural purity.', null, './assets/audio/artist3_piece1.mp3');
+    createArtwork('painting_3', 11.95, 5.2, -2.8, -Math.PI / 2, 1.6, 1.4, 'PAINTING 3', 'Exploring tactile surfaces and subtle tonal shifts.', null, './assets/audio/artist3_piece2.mp3');
+    createArtwork('painting_4', 11.95, 0.8, -3.2, -Math.PI / 2, 1.5, 1.5, 'PAINTING 4', 'Reflecting ancient architectural traditions.', null, './assets/audio/artist3_piece1.mp3');
+    createArtwork('painting_5', 11.95, 4.8, 2.9, -Math.PI / 2, 1.4, 1.8, 'PAINTING 5', 'Mathematical harmony manifested through visual balance.', null, './assets/audio/artist3_piece2.mp3');
+    createArtwork('painting_6', 11.95, 2.6, 3.2, -Math.PI / 2, 1.5, 1.3, 'PAINTING 6', 'Capturing evening serenity across classical facades.', null, './assets/audio/artist3_piece1.mp3');
+    createArtwork('painting_7', 11.95, 0.9, 2.5, -Math.PI / 2, 1.4, 1.4, 'PAINTING 7', 'Warm earth tones and tactile pigment studies.', null, './assets/audio/artist3_piece2.mp3');
 
-    createArtwork('painting_8', -8.0, 2.5, -7.95, 0, 2.2, 1.8, 'Painting 8', 'A vibrant exploration of cultural heritage and identity motifs.', null, './assets/audio/artist1_piece1.mp3');
-    createArtwork('painting_9', 8.5, 2.8, -7.95, 0, 2.0, 2.0, 'Painting 9', 'Architectural perspective highlighting monumental scale.', null, './assets/audio/artist1_piece1.mp3');
-
-    createArtwork('painting_10', -7.0, 2.2, 7.95, Math.PI, 2.4, 1.8, 'Painting 10', 'Expressive portraiture highlighting human emotion and texture.', null, './assets/audio/artist2_piece1.mp3');
-    createArtwork('painting_11', -1.0, 3.0, 7.95, Math.PI, 2.0, 2.2, 'Painting 11', 'Dramatic lighting framing a draped silhouette study.', null, './assets/audio/artist2_piece2.mp3');
-    createArtwork('painting_12', 6.5, 2.5, 7.95, Math.PI, 2.6, 1.7, 'Painting 12', 'Ornamental balance and metallic light reflections.', null, './assets/audio/artist2_piece3.mp3');
+    // South Wall
+    createArtwork('painting_10', -7.0, 2.2, 7.95, Math.PI, 2.4, 1.8, 'PAINTING 10', 'Expressive portraiture highlighting human emotion.', null, './assets/audio/artist2_piece1.mp3');
+    createArtwork('painting_11', -1.0, 3.0, 7.95, Math.PI, 2.0, 2.2, 'PAINTING 11', 'Dramatic lighting framing a draped silhouette.', null, './assets/audio/artist2_piece2.mp3');
+    createArtwork('painting_12', 6.5, 2.5, 7.95, Math.PI, 2.6, 1.7, 'PAINTING 12', 'Ornamental balance and metallic light reflections.', null, './assets/audio/artist2_piece3.mp3');
 
     var eulerY = -Math.PI / 2;
     var eulerX = 0;
@@ -604,13 +775,16 @@
       isInspecting = !isInspecting;
       if (isInspecting) {
         if (!isMobileMode) document.exitPointerLock();
-        inspectArtist.textContent = currentLookAtTarget.artist;
         inspectTitle.textContent = currentLookAtTarget.title;
-        inspectDesc.textContent = currentLookAtTarget.desc;
+        inspectImg.src = currentLookAtTarget.imgSrc || '';
         inspectModal.classList.add('visible');
+        navInstructions.classList.add('hidden'); // Hide Nav Overlay in Inspect Mode
       } else {
         inspectModal.classList.remove('visible');
-        if (!isMobileMode) document.body.requestPointerLock();
+        if (!isMobileMode) {
+          navInstructions.classList.remove('hidden'); // Show Nav Overlay on Exit
+          document.body.requestPointerLock();
+        }
       }
     }
 
@@ -627,10 +801,10 @@
       if (currentLookAtTarget && currentLookAtTarget.audio) {
         if (currentLookAtTarget.audio.paused) {
           currentLookAtTarget.audio.play().catch(function(){});
-          modalAudioBtn.textContent = 'Pause Audio Guide';
+          modalAudioBtn.textContent = '❚❚';
         } else {
           currentLookAtTarget.audio.pause();
-          modalAudioBtn.textContent = 'Play Audio Guide';
+          modalAudioBtn.textContent = '▶';
         }
       }
     });
@@ -749,6 +923,15 @@
             currentTargetId = null;
             audioUi.classList.remove('visible');
           }
+        }
+
+        // Update progress bar if audio is playing
+        if (currentAudio && !currentAudio.paused && currentAudio.duration) {
+          var pct = (currentAudio.currentTime / currentAudio.duration) * 100;
+          trackProgress.style.width = pct + '%';
+          var mins = Math.floor(currentAudio.currentTime / 60);
+          var secs = Math.floor(currentAudio.currentTime % 60);
+          audioTimeDisplay.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
         }
       }
 
