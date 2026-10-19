@@ -309,7 +309,7 @@
     .audio-info h4 {
       margin: 0;
       font-size: 0.85rem;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
       color: #fff;
     }
@@ -512,21 +512,25 @@
 
     var camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.rotation.order = 'YXZ';
+    
+    // Spawn camera on the West side near door, facing East directly toward the East Wall feature display
     camera.position.set(-10, 1.6, 0);
 
-    var renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    var renderer = new THREE.WebGLRenderer({ antialias: true, failIfMajorPerformanceCaveat: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.9;
     document.body.appendChild(renderer.domElement);
 
+    // Original clean neutral gallery ambient lighting
     var hemiLight = new THREE.HemisphereLight(0xe8e4dc, 0x222226, 0.4);
     scene.add(hemiLight);
 
-    // Dedicated soft overhead spotlight mounted directly above each painting and door
-    function addIndividualPaintingSpotlight(x, y, z, rotY) {
-      var offset = 1.2;
+    // Precise Spotlighting Function with Warm Tones (Hex 0xffd8a6) over the paintings
+    function addIndividualPaintingSpotlight(x, y, z, rotY, frameHeight) {
+      var h = frameHeight || 2.0;
+      var offset = 0.35;
       var lightX = x;
       var lightZ = z;
 
@@ -535,8 +539,9 @@
       else if (Math.abs(rotY - (-Math.PI / 2)) < 0.1) { lightX -= offset; }
       else if (Math.abs(rotY - (Math.PI / 2)) < 0.1) { lightX += offset; }
 
-      var light = new THREE.SpotLight(0xfff6eb, 0.85, 9, Math.PI / 2.6, 0.45, 0.9);
-      light.position.set(lightX, y + 1.8, lightZ);
+      var lightPosY = y + (h / 2) + 0.3;
+      var light = new THREE.SpotLight(0xffd8a6, 1.1, 7, Math.PI / 6, 0.8, 1.5);
+      light.position.set(lightX, lightPosY, lightZ);
 
       var targetObj = new THREE.Object3D();
       targetObj.position.set(x, y, z);
@@ -616,20 +621,24 @@
     var marbleMatLong = new THREE.MeshStandardMaterial({ map: longWallTex, roughness: 0.35, metalness: 0.02 });
     var marbleMatShort = new THREE.MeshStandardMaterial({ map: shortWallTex, roughness: 0.35, metalness: 0.02 });
 
+    // NORTH WALL
     var northMesh = new THREE.Mesh(new THREE.PlaneGeometry(24, wallHeight), marbleMatLong);
     northMesh.position.set(0, wallHeight/2, -8);
     scene.add(northMesh);
 
+    // SOUTH WALL
     var southMesh = new THREE.Mesh(new THREE.PlaneGeometry(24, wallHeight), marbleMatLong);
     southMesh.position.set(0, wallHeight/2, 8);
     southMesh.rotation.y = Math.PI;
     scene.add(southMesh);
     
+    // EAST WALL
     var eastWall = new THREE.Mesh(new THREE.PlaneGeometry(16, wallHeight), marbleMatShort);
     eastWall.position.set(12, wallHeight / 2, 0);
     eastWall.rotation.y = -Math.PI / 2;
     scene.add(eastWall);
 
+    // WEST WALL (Entrance Door Wall)
     var westWall = new THREE.Mesh(new THREE.PlaneGeometry(16, wallHeight), marbleMatShort);
     westWall.position.set(-12, wallHeight / 2, 0);
     westWall.rotation.y = Math.PI / 2;
@@ -685,8 +694,7 @@
       doorGroup.position.set(-11.92, 2.42, 0);
       scene.add(doorGroup);
 
-      // Overhead spotlight over the entrance door
-      addIndividualPaintingSpotlight(-11.92, 2.42, 0, Math.PI / 2);
+      addIndividualPaintingSpotlight(-11.92, 2.42, 0, Math.PI / 2, 4.85);
     }
     buildEntranceDoor();
 
@@ -725,29 +733,33 @@
       scene.add(group);
       interactables.push(canvasMesh);
 
-      // Mount spotlight above painting
-      addIndividualPaintingSpotlight(x, y, z, rotY);
+      addIndividualPaintingSpotlight(x, y, z, rotY, h);
     }
 
-    // --- ARTWORKS CREATION ---
-    // North Wall
-    createArtwork('painting_1', 0.0, 2.8, -7.95, 0, 3.6, 2.8, 'PAINTING 1', 'An intense psychological exploration of internal conflict.', './SELF-HATRED.jpg', './assets/audio/artist1_piece1.mp3');
-    createArtwork('painting_8', -8.0, 2.5, -7.95, 0, 2.2, 1.8, 'PAINTING 8', 'A vibrant exploration of cultural heritage.', null, './assets/audio/artist1_piece1.mp3');
-    createArtwork('painting_9', 8.5, 2.8, -7.95, 0, 2.0, 2.0, 'PAINTING 9', 'Architectural perspective highlighting monumental scale.', null, './assets/audio/artist1_piece1.mp3');
+    // --- EAST WALL: EVENLY SPACED GALLERY LAYOUT (X = 11.95, RotY = -Math.PI / 2) ---
+    // Central Main Portrait
+    createArtwork('painting_1', 11.95, 4.3, 0.0, -Math.PI / 2, 3.8, 6.2, 'SELF-HATRED', 'An intense psychological exploration of internal conflict.', './SELF-HATRED.jpg', './assets/audio/artist1_piece1.mp3');
 
-    // East Feature Wall
-    createArtwork('painting_2', 11.95, 2.8, 0.0, -Math.PI / 2, 2.8, 4.2, 'PAINTING 2', 'A monumental study capturing structural purity.', null, './assets/audio/artist3_piece1.mp3');
-    createArtwork('painting_3', 11.95, 5.2, -2.8, -Math.PI / 2, 1.6, 1.4, 'PAINTING 3', 'Exploring tactile surfaces and subtle tonal shifts.', null, './assets/audio/artist3_piece2.mp3');
-    createArtwork('painting_4', 11.95, 0.8, -3.2, -Math.PI / 2, 1.5, 1.5, 'PAINTING 4', 'Reflecting ancient architectural traditions.', null, './assets/audio/artist3_piece1.mp3');
-    createArtwork('painting_5', 11.95, 4.8, 2.9, -Math.PI / 2, 1.4, 1.8, 'PAINTING 5', 'Mathematical harmony manifested through visual balance.', null, './assets/audio/artist3_piece2.mp3');
-    createArtwork('painting_6', 11.95, 2.6, 3.2, -Math.PI / 2, 1.5, 1.3, 'PAINTING 6', 'Capturing evening serenity across classical facades.', null, './assets/audio/artist3_piece1.mp3');
-    createArtwork('painting_7', 11.95, 0.9, 2.5, -Math.PI / 2, 1.4, 1.4, 'PAINTING 7', 'Warm earth tones and tactile pigment studies.', null, './assets/audio/artist3_piece2.mp3');
+    // Flank 1 (Left side, 3 evenly spaced canvases: Top, Middle, Bottom)
+    createArtwork('east_tl', 11.95, 6.3, -3.4, -Math.PI / 2, 2.0, 1.8, 'PAINTING 2', 'Upper left canvas study.', null, './assets/audio/artist1_piece1.mp3');
+    createArtwork('east_ml', 11.95, 4.3, -3.4, -Math.PI / 2, 2.0, 1.8, 'PAINTING 3', 'Middle left canvas study.', null, './assets/audio/artist1_piece1.mp3');
+    createArtwork('east_bl', 11.95, 2.3, -3.4, -Math.PI / 2, 2.0, 1.8, 'PAINTING 4', 'Lower left canvas study.', null, './assets/audio/artist1_piece1.mp3');
 
-    // South Wall
-    createArtwork('painting_10', -7.0, 2.2, 7.95, Math.PI, 2.4, 1.8, 'PAINTING 10', 'Expressive portraiture highlighting human emotion.', null, './assets/audio/artist2_piece1.mp3');
-    createArtwork('painting_11', -1.0, 3.0, 7.95, Math.PI, 2.0, 2.2, 'PAINTING 11', 'Dramatic lighting framing a draped silhouette.', null, './assets/audio/artist2_piece2.mp3');
-    createArtwork('painting_12', 6.5, 2.5, 7.95, Math.PI, 2.6, 1.7, 'PAINTING 12', 'Ornamental balance and metallic light reflections.', null, './assets/audio/artist2_piece3.mp3');
+    // Flank 2 (Right side, 2 evenly spaced canvases: Top, Bottom)
+    createArtwork('east_tr', 11.95, 5.4, 3.4, -Math.PI / 2, 2.2, 2.0, 'PAINTING 5', 'Upper right canvas study.', null, './assets/audio/artist1_piece1.mp3');
+    createArtwork('east_br', 11.95, 3.2, 3.4, -Math.PI / 2, 2.2, 2.0, 'PAINTING 6', 'Lower right canvas study.', null, './assets/audio/artist1_piece1.mp3');
 
+    // --- NORTH WALL ---
+    createArtwork('north_1', 0.0, 2.8, -7.95, 0, 2.8, 3.5, 'PAINTING 7', 'A monumental study.', null, './assets/audio/artist3_piece1.mp3');
+    createArtwork('north_2', -7.0, 2.8, -7.95, 0, 2.2, 2.0, 'PAINTING 8', 'Exploring tactile surfaces.', null, './assets/audio/artist3_piece2.mp3');
+    createArtwork('north_3', 7.0, 2.8, -7.95, 0, 2.2, 2.0, 'PAINTING 9', 'Reflecting ancient traditions.', null, './assets/audio/artist3_piece1.mp3');
+
+    // --- SOUTH WALL ---
+    createArtwork('south_1', -7.0, 2.2, 7.95, Math.PI, 2.4, 1.8, 'PAINTING 10', 'Expressive portraiture.', null, './assets/audio/artist2_piece1.mp3');
+    createArtwork('south_2', 0.0, 2.8, 7.95, Math.PI, 2.6, 2.2, 'PAINTING 11', 'Dramatic lighting.', null, './assets/audio/artist2_piece2.mp3');
+    createArtwork('south_3', 6.5, 2.5, 7.95, Math.PI, 2.6, 1.7, 'PAINTING 12', 'Ornamental balance.', null, './assets/audio/artist2_piece3.mp3');
+
+    // Set initial camera rotation facing directly toward East Wall (RotY = -Math.PI / 2)
     var eulerY = -Math.PI / 2;
     var eulerX = 0;
     var moveInput = { forward: 0, right: 0 };
@@ -778,11 +790,11 @@
         inspectTitle.textContent = currentLookAtTarget.title;
         inspectImg.src = currentLookAtTarget.imgSrc || '';
         inspectModal.classList.add('visible');
-        navInstructions.classList.add('hidden'); // Hide Nav Overlay in Inspect Mode
+        navInstructions.classList.add('hidden');
       } else {
         inspectModal.classList.remove('visible');
         if (!isMobileMode) {
-          navInstructions.classList.remove('hidden'); // Show Nav Overlay on Exit
+          navInstructions.classList.remove('hidden');
           document.body.requestPointerLock();
         }
       }
@@ -925,7 +937,6 @@
           }
         }
 
-        // Update progress bar if audio is playing
         if (currentAudio && !currentAudio.paused && currentAudio.duration) {
           var pct = (currentAudio.currentTime / currentAudio.duration) * 100;
           trackProgress.style.width = pct + '%';
